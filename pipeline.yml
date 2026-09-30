@@ -1,0 +1,93 @@
+name: Pipeline CI
+
+on:
+  push:
+    branches:
+      - main
+
+  pull_request:
+    branches:
+      - main
+
+jobs:
+
+  # JOB DE QUALIDADE
+  quality:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout código
+        uses: actions/checkout@v4
+
+      - name: Verificar arquivos
+        run: |
+          echo "Verificando estrutura do projeto..."
+          test -f index.html
+          test -f Dockerfile
+          echo "Arquivos encontrados com sucesso!"
+
+
+  # JOB DE TESTE
+  test:
+    runs-on: ubuntu-latest
+    needs: quality
+
+    steps:
+      - name: Checkout código
+        uses: actions/checkout@v4
+
+      - name: Build da imagem para teste
+        run: |
+          docker build -t pipeline-ci:test .
+
+      - name: Executar container
+        run: |
+          docker run -d \
+            --name pipeline-container \
+            -p 8080:80 \
+            pipeline-ci:test
+
+      - name: Aguardar Nginx iniciar
+        run: |
+          sleep 3
+
+      - name: Testar aplicação
+        run: |
+          curl --fail http://localhost:8080
+
+      - name: Verificar conteúdo
+        run: |
+          curl --fail http://localhost:8080 | grep "Doce de Mocotó"
+
+      - name: Mostrar logs em caso de erro
+        if: failure()
+        run: |
+          docker logs pipeline-container
+
+      - name: Remover container
+        if: always()
+        run: |
+          docker rm -f pipeline-container
+
+
+  # JOB DE BUILD E PUSH
+  build:
+    runs-on: ubuntu-latest
+    needs: test
+
+    steps:
+      - name: Checkout código
+        uses: actions/checkout@v4
+
+      - name: Login no Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_USER }}
+          password: ${{ secrets.DOCKER_PASS }}
+
+      - name: Build e Push de Imagem
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: true
+          tags: brngdicenatsuki/pipeline-ci:latest

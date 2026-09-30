@@ -1,0 +1,112 @@
+<!DOCTYPE html> <html lang="pt-BR"> <head> <meta charset="UTF-8"> <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Doce de Mocotó</title>
+
+<style>
+    html,
+    body {
+        margin: 0;
+        padding: 0;
+        width: 100%;
+        min-height: 100%;
+        background: #fff;
+        font-family: Arial, Helvetica, sans-serif;
+    }
+
+    body {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .imagem-container {
+        width: 100%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .imagem-container img {
+        display: block;
+
+        width: 100%;
+        max-width: 1000px;
+        height: auto;
+
+        cursor: pointer;
+    }
+
+    #upload {
+        display: none;
+    }
+
+    .email {
+        margin-top: 15px;
+        margin-bottom: 30px;
+
+        font-size: 14px;
+        color: #000;
+    }
+
+    .email a {
+        color: #000;
+        text-decoration: none;
+    }
+
+    .email a:hover {
+        text-decoration: underline;
+    }
+</style>
+
+</head> <body>
+<input
+    type="file"
+    id="upload"
+    accept="image/*"
+>
+
+<div class="imagem-container">
+    <label for="upload">
+        <img
+            id="doce"
+            src="https://www.sabornamesa.com.br/media/k2/items/cache/8d7346542ffded93378375d0c10efb4f_XL.jpg"
+            alt="Doce de Mocotó"
+            title="Clique para trocar a imagem"
+        >
+    </label>
+</div>
+
+<div class="email">
+    <a href="mailto:mocoto@mocoto.com.br">
+        mocoto@mocoto.com.br
+    </a>
+</div>
+
+
+<script>
+    const upload = document.getElementById("upload");
+    const imagem = document.getElementById("doce");
+
+    upload.addEventListener("change", function () {
+
+        const arquivo = this.files[0];
+
+        if (!arquivo) {
+            return;
+        }
+
+        if (!arquivo.type.startsWith("image/")) {
+            alert("Selecione uma imagem válida.");
+            return;
+        }
+
+        const leitor = new FileReader();
+
+        leitor.onload = function (evento) {
+            imagem.src = evento.target.result;
+        };
+
+        leitor.readAsDataURL(arquivo);
+    });
+</script>
+
+</body> </html>
